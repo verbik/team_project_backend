@@ -59,6 +59,10 @@ class Beverage(models.Model):
         abstract = True
 
 
+class GrapeVariety(models.Model):
+    name = models.CharField(max_length=255)
+
+
 class Wine(Beverage):
     SUGAR_CONTENT_CHOICES = {
         "SWEET": "Sweet",
@@ -81,4 +85,4 @@ class Wine(Beverage):
     # Sugar content of the wine
     sugar_content = models.CharField(max_length=20, choices=SUGAR_CONTENT_CHOICES)
     color = models.CharField(max_length=5, choices=COLOR_CHOICES)
-    grape_variety = models.CharField(max_length=255)
+    grape_variety = models.ManyToManyField(GrapeVariety, related_name="grape_variety")

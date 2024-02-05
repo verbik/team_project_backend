@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from products.models import Manufacturer, Country, Beverage, Wine
+from products.models import Manufacturer, Country, Beverage, Wine, GrapeVariety
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -9,6 +9,16 @@ class CountrySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class GrapeVarietySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrapeVariety
+        fields = (
+            "id",
+            "name",
+        )
+
+
+#  TODO: add nested serializer
 class ManufacturerSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -65,3 +75,11 @@ class WineSerializer(BeverageSerializer):
             "color",
             "grape_variety",
         )
+
+    #  TODO: add nested serializer
+
+
+class WineDetailSerializer(WineSerializer):
+    grape_variety = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
