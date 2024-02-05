@@ -36,10 +36,12 @@ class Beverage(models.Model):
     )
 
     # Alcohol content of specific beverage
-    alcohol_content = models.FloatField()  # TODO: add constraints
+    alcohol_content = models.FloatField(null=True, blank=True)  # TODO: add constraints
 
-    # Volume of the beverage
-    volume = models.IntegerField()  # TODO: add constraints
+    # Volume of the beverage in liters
+    volume = models.DecimalField(
+        max_digits=4, decimal_places=2
+    )  # TODO: add constraints
     #  TODO: add imagefield
 
     class Meta:
