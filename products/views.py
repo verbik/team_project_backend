@@ -1,11 +1,12 @@
 from rest_framework import viewsets
 
-from products.models import Manufacturer, Country
+from products.models import Manufacturer, Country, Wine
 from products.serializers import (
     ManufacturerListSerializer,
     ManufacturerDetailSerializer,
     ManufacturerSerializer,
     CountrySerializer,
+    WineSerializer,
 )
 
 
@@ -25,3 +26,8 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
             return ManufacturerDetailSerializer
 
         return ManufacturerSerializer
+
+
+class WineViewSet(viewsets.ModelViewSet):
+    queryset = Wine.objects.all()
+    serializer_class = WineSerializer
