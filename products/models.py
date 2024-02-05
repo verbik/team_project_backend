@@ -1,14 +1,6 @@
 from django.db import models
 
 
-class Manufacturer(models.Model):
-    name = models.CharField(max_length=255)
-    info = models.TextField(null=True, blank=True)
-    country_of_origin = models.CharField(max_length=255)
-    website = models.URLField()
-    #  TODO: add imagefield
-
-
 class Country(models.Model):
     name = models.CharField(max_length=255)
 
@@ -16,6 +8,14 @@ class Country(models.Model):
 class Region(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     region = models.CharField(max_length=255)
+
+
+class Manufacturer(models.Model):
+    name = models.CharField(max_length=255)
+    info = models.TextField(null=True, blank=True)
+    country_of_origin = models.ForeignKey(Country, on_delete=models.CASCADE)
+    website = models.URLField()
+    #  TODO: add imagefield
 
 
 class Beverage(models.Model):
