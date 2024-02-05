@@ -1,4 +1,8 @@
+import os
+import uuid
+
 from django.db import models
+from django.utils.text import slugify
 
 
 class Country(models.Model):
@@ -16,6 +20,13 @@ class Manufacturer(models.Model):
     country_of_origin = models.ForeignKey(Country, on_delete=models.CASCADE)
     website = models.URLField()
     #  TODO: add imagefield
+
+
+def create_custom_path(instance, filename):
+    _, extension = os.path.splitext(filename)
+    return os.path.join(
+        "uploads", "images", f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
+    )
 
 
 class Beverage(models.Model):
@@ -42,7 +53,7 @@ class Beverage(models.Model):
     volume = models.DecimalField(
         max_digits=4, decimal_places=2
     )  # TODO: add constraints
-    #  TODO: add imagefield
+    image = models.ImageField(null=True, upload_to=create_custom_path)
 
     class Meta:
         abstract = True

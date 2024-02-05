@@ -52,6 +52,7 @@ class BeverageSerializer(serializers.ModelSerializer):
             "region",
             "alcohol_content",
             "volume",
+            "image",
         )
 
 
