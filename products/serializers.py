@@ -86,7 +86,13 @@ class WineDetailSerializer(WineSerializer):
     country = serializers.SlugRelatedField(
         many=False, read_only=True, slug_field="name"
     )
+    manufacturer = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field="name"
+    )
 
 
-class WineListSerializer(WineSerializer):
-    pass
+class WineListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Wine
+        fields = ("image", "short_description", "price", "product_code")

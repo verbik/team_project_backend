@@ -86,3 +86,16 @@ class Wine(Beverage):
     sugar_content = models.CharField(max_length=20, choices=SUGAR_CONTENT_CHOICES)
     color = models.CharField(max_length=5, choices=COLOR_CHOICES)
     grape_variety = models.ManyToManyField(GrapeVariety, related_name="grape_variety")
+
+    @property
+    def short_description(self):
+        return (
+            f"Wine {self.name}, "
+            f"{self.manufacturer.name}, "
+            f"{self.get_color_display()} "
+            f"{self.get_sugar_content_display()} "
+            f"{self.volume} l"
+        )
+
+    def __str__(self):
+        return self.short_description
