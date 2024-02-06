@@ -83,3 +83,10 @@ class WineDetailSerializer(WineSerializer):
     grape_variety = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="name"
     )
+    country = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field="name"
+    )
+
+
+class WineListSerializer(WineSerializer):
+    pass

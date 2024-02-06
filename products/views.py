@@ -8,6 +8,8 @@ from products.serializers import (
     CountrySerializer,
     WineSerializer,
     GrapeVarietySerializer,
+    WineDetailSerializer,
+    WineListSerializer,
 )
 
 
@@ -36,4 +38,12 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 class WineViewSet(viewsets.ModelViewSet):
     queryset = Wine.objects.all()
-    serializer_class = WineSerializer
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return WineDetailSerializer
+
+        if self.action == "list":
+            return WineListSerializer
+
+        return WineSerializer
