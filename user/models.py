@@ -1,6 +1,9 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
+from phonenumbers import PhoneNumber
+from phonenumbers.phonenumberutil import parse
 
 
 class UserManager(BaseUserManager):
@@ -38,15 +41,45 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    GENDER_CHOICES = {
+        "MALE": "Male",
+        "FEMALE": "Female",
+        "OTHER": "Other",
+        "NOT PROVIDED": "Not provided",
+    }
+
     username = None
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=50)  # TODO: add validation and test it
+    last_name = models.CharField(max_length=50)  # TODO: add validation and test it
     email = models.EmailField(_("email address"), unique=True)
+    # Additional info about user
+    gender = models.CharField(
+        max_length=12, choices=GENDER_CHOICES, null=True, blank=True
+    )
+    birthday = models.DateTimeField(
+        null=True, blank=True
+    )  # TODO: add validation and test it
+    phone_number = models.CharField(
+        max_length=20, blank=True, null=True
+    )  # TODO: test validation
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
     objects = UserManager()
+
+    def clean(self):
+        # Validate and normalize phone number
+        if self.phone_number:
+            try:
+                parsed_number = parse(self.phone_number, None)
+                self.phone_number = str(
+                    PhoneNumber(
+                        parsed_number.country_code, parsed_number.national_number
+                    )
+                )
+            except Exception as e:
+                raise ValidationError({"phone_number": [f"Invalid phone number: {e}"]})
 
     def __str__(self):
         return f"{self.get_full_name()} - {self.email}"
