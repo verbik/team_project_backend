@@ -18,15 +18,7 @@ class Order(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
     is_paid = models.BooleanField(default=False)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    def save(self, *args, **kwargs):  # TODO: rewrite validation
-        super().save(*args, **kwargs)
-        # Calculate total_price by summing item_price of every order item
-        total_price = sum(item.item_price for item in self.items.all())
-        self.total_price = total_price
-
-        # Save again to update total_price
-        super().save()
+    # TODO: try saving counted total_price in models
 
     class Meta:
         ordering = ["-created_at"]
