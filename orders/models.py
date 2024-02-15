@@ -45,7 +45,7 @@ class OrderItem(models.Model):
 
     quantity = models.PositiveIntegerField(
         validators=[MinValueValidator(1)], default=1
-    )  # TODO: add validation
+    )
 
     def __str__(self):
         return f"{self.quantity} x {self.content_object}"
