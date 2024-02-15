@@ -43,9 +43,7 @@ class OrderItem(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
-    quantity = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)], default=1
-    )  # TODO: add validation
+    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)], default=1)
 
     def __str__(self):
         return f"{self.quantity} x {self.content_object}"

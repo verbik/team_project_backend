@@ -1,5 +1,7 @@
-from rest_framework import viewsets
-
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
 from products.models import Manufacturer, Country, Wine, GrapeVariety
 from products.serializers import (
     ManufacturerListSerializer,
@@ -10,6 +12,8 @@ from products.serializers import (
     GrapeVarietySerializer,
     WineDetailSerializer,
     WineListSerializer,
+    WineCreateSerializer,
+    WineImageSerializer,
 )
 
 
@@ -37,7 +41,12 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 
 class WineViewSet(viewsets.ModelViewSet):
-    queryset = Wine.objects.all()
+    def get_queryset(self):
+        queryset = Wine.objects.all().select_related("manufacturer")
+
+        if self.action == "retrieve":
+            queryset = queryset.prefetch_related("grape_variety")
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -46,4 +55,25 @@ class WineViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return WineListSerializer
 
+        if self.action in ["create", "update", "partial-update"]:
+            return WineCreateSerializer
+
+        if self.action == "upload_image":
+            return WineImageSerializer
+
         return WineSerializer
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="upload-image",
+        permission_classes=[IsAdminUser],
+    )
+    def upload_image(self, request, pk=None):
+        """Endpoint for uploading image to specific wine instance."""
+        wine = self.get_object()
+        serializer = self.get_serializer(wine, data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
