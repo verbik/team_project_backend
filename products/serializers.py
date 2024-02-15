@@ -85,12 +85,21 @@ class WineCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wine
-        fields = BeverageSerializer.Meta.fields + (
+        fields = (
+            "id",
+            "name",
+            "price",
+            "description",
+            "product_code",
+            "alcohol_content",
+            "volume",
             "year",
             "sugar_content",
             "color",
+            "manufacturer",
+            "country",
+            "region",
             "grape_variety",
-            "image",
         )
 
     def create(self, validated_data):

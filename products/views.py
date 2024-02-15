@@ -55,7 +55,7 @@ class WineViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return WineListSerializer
 
-        if self.action in ["create", "update", "partial_update"]:
+        if self.action in ["create", "update", "partial-update"]:
             return WineCreateSerializer
 
         if self.action == "upload_image":
