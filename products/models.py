@@ -28,7 +28,9 @@ class Region(models.Model):
 class Manufacturer(models.Model):
     name = models.CharField(max_length=255)
     info = models.TextField(null=True, blank=True)
-    country_of_origin = models.ForeignKey(Country, on_delete=models.CASCADE)
+    country_of_origin = models.ForeignKey(
+        Country, on_delete=models.CASCADE, blank=True, null=True
+    )
     website = models.URLField()
 
     def __str__(self):
