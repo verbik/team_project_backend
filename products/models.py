@@ -8,10 +8,20 @@ from django.utils.text import slugify
 class Country(models.Model):
     name = models.CharField(max_length=255)
 
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "countries"
+
+    def __str__(self):
+        return self.name
+
 
 class Region(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     region = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.region
 
 
 class Manufacturer(models.Model):
@@ -20,6 +30,9 @@ class Manufacturer(models.Model):
     country_of_origin = models.ForeignKey(Country, on_delete=models.CASCADE)
     website = models.URLField()
     #  TODO: add imagefield
+
+    def __str__(self):
+        return self.name
 
 
 def create_custom_path(instance, filename):
@@ -44,7 +57,7 @@ class Beverage(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     region = models.ForeignKey(
         Region, on_delete=models.DO_NOTHING, null=True, blank=True
-    )
+    )  # TODO: region can be only from country in wine
 
     # Alcohol content of specific beverage
     alcohol_content = models.FloatField(null=True, blank=True)  # TODO: add constraints
@@ -53,7 +66,7 @@ class Beverage(models.Model):
     volume = models.DecimalField(
         max_digits=4, decimal_places=2
     )  # TODO: add constraints
-    image = models.ImageField(null=True, upload_to=create_custom_path)
+    image = models.ImageField(null=True, blank=True, upload_to=create_custom_path)
 
     class Meta:
         abstract = True
@@ -61,6 +74,12 @@ class Beverage(models.Model):
 
 class GrapeVariety(models.Model):
     name = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name_plural = "grape varieties"
+
+    def __str__(self):
+        return self.name
 
 
 class Wine(Beverage):
