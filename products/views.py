@@ -10,6 +10,7 @@ from products.serializers import (
     GrapeVarietySerializer,
     WineDetailSerializer,
     WineListSerializer,
+    WineCreateSerializer,
 )
 
 
@@ -50,5 +51,8 @@ class WineViewSet(viewsets.ModelViewSet):
 
         if self.action == "list":
             return WineListSerializer
+
+        if self.action == "create":
+            return WineCreateSerializer
 
         return WineSerializer

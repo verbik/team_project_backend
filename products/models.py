@@ -73,11 +73,14 @@ class Beverage(models.Model):
 
     def clean(self):
         # Ensure that content_object is an instance of Beverage or its subclasses
-        if self.region.country != self.country:
-            raise ValidationError(
-                {"region": "The wine region must be selected from the chosen country."},
-                code="invalid_region",
-            )
+        if self.region:
+            if self.region.country != self.country:
+                raise ValidationError(
+                    {
+                        "region": "The wine region must be selected from the chosen country."
+                    },
+                    code="invalid_region",
+                )
 
     def save(self, *args, **kwargs):
         self.clean()
