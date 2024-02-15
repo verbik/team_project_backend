@@ -42,6 +42,7 @@ class UserDetailViewSet(viewsets.ModelViewSet):
 
     @action(methods=["POST"], detail=True, url_path="change-password")
     def change_password(self, request, *args, **kwargs):
+        """Endpoint for changing password"""
         serializer = self.get_serializer(instance=request.user, data=request.data)
 
         if serializer.is_valid():

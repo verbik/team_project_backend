@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -8,10 +9,20 @@ from django.utils.text import slugify
 class Country(models.Model):
     name = models.CharField(max_length=255)
 
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "countries"
+
+    def __str__(self):
+        return self.name
+
 
 class Region(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     region = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.region
 
 
 class Manufacturer(models.Model):
@@ -19,7 +30,9 @@ class Manufacturer(models.Model):
     info = models.TextField(null=True, blank=True)
     country_of_origin = models.ForeignKey(Country, on_delete=models.CASCADE)
     website = models.URLField()
-    #  TODO: add imagefield
+
+    def __str__(self):
+        return self.name
 
 
 def create_custom_path(instance, filename):
@@ -53,14 +66,32 @@ class Beverage(models.Model):
     volume = models.DecimalField(
         max_digits=4, decimal_places=2
     )  # TODO: add constraints
-    image = models.ImageField(null=True, upload_to=create_custom_path)
+    image = models.ImageField(null=True, blank=True, upload_to=create_custom_path)
 
     class Meta:
         abstract = True
 
+    def clean(self):
+        # Ensure that content_object is an instance of Beverage or its subclasses
+        if self.region.country != self.country:
+            raise ValidationError(
+                {"region": "The wine region must be selected from the chosen country."},
+                code="invalid_region",
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
 
 class GrapeVariety(models.Model):
     name = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name_plural = "grape varieties"
+
+    def __str__(self):
+        return self.name
 
 
 class Wine(Beverage):

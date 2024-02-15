@@ -1,8 +1,13 @@
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from decimal import Decimal
+from django.utils.translation import gettext_lazy as _
+
+from products.models import Beverage
 
 
 class Order(models.Model):
@@ -17,11 +22,16 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
     is_paid = models.BooleanField(default=False)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    # TODO: try saving counted total_price in models
+
+    @property
+    def total_price(self) -> Decimal:
+        return sum(item.item_price for item in self.items.all())
 
     class Meta:
         ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Order {self.id}: user - {self.user}, date - {self.created_at.date()}"
 
 
 class OrderItem(models.Model):
@@ -34,7 +44,7 @@ class OrderItem(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     quantity = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(1)], default=1
     )  # TODO: add validation
 
     def __str__(self):
@@ -49,3 +59,16 @@ class OrderItem(models.Model):
         indexes = [
             models.Index(fields=["content_type", "object_id"]),
         ]
+
+    def clean(self):
+        # Ensure that content_object is an instance of Beverage or its subclasses
+        if not isinstance(self.content_object, Beverage):
+            raise ValidationError(
+                _(
+                    "Only instances of Beverage or its subclasses are allowed as content objects."
+                )
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
