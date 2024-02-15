@@ -1,6 +1,7 @@
 import os
 import re
 import uuid
+from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -93,7 +94,7 @@ class Beverage(models.Model):
     def validate_product_code(product_code: str, error_to_raise):
         if len(product_code) < 7:
             raise error_to_raise("Product code must be of length 7.")
-        pattern = re.compile("^[A-Z0-9]+$")
+        pattern = re.compile("^[A-ZА-Я0-9]+$")
         if not bool(pattern.match(product_code)):
             raise error_to_raise(
                 "Product code must contain only uppercase letters and numbers."
@@ -137,8 +138,10 @@ class Wine(Beverage):
     }
 
     year = models.IntegerField(
-        blank=True, null=True
-    )  # TODO: add validation for year + placeholder
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1920), MaxValueValidator(datetime.today().year)],
+    )
 
     # Sugar content of the wine
     sugar_content = models.CharField(max_length=20, choices=SUGAR_CONTENT_CHOICES)
