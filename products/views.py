@@ -2,6 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
+
+from products.filters import WineFilter
 from products.models import Manufacturer, Country, Wine, GrapeVariety
 from products.serializers import (
     ManufacturerListSerializer,
@@ -41,6 +43,8 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 
 class WineViewSet(viewsets.ModelViewSet):
+    filterset_class = WineFilter
+
     def get_queryset(self):
         queryset = Wine.objects.all().select_related("manufacturer")
 
