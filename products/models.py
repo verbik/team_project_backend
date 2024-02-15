@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -54,7 +55,7 @@ class Beverage(models.Model):
     manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
 
     # Unique product code
-    product_code = models.CharField(max_length=7, unique=True)  # TODO: add validation
+    product_code = models.CharField(max_length=7, unique=True)
 
     # Country and region the beverage was produced in
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
@@ -88,11 +89,22 @@ class Beverage(models.Model):
                     "Region must be selected from the instance country."
                 )
 
+    @staticmethod
+    def validate_product_code(product_code: str, error_to_raise):
+        if len(product_code) < 7:
+            raise error_to_raise("Product code must be of length 7.")
+        pattern = re.compile("^[A-Z0-9]+$")
+        if not bool(pattern.match(product_code)):
+            raise error_to_raise(
+                "Product code must contain only uppercase letters and numbers."
+            )
+
     class Meta:
         abstract = True
 
     def clean(self):
         Beverage.validate_region(self.region, self.country, ValidationError)
+        Beverage.validate_product_code(self.product_code, ValidationError)
 
     def save(self, *args, **kwargs):
         self.clean()

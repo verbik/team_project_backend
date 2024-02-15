@@ -87,6 +87,8 @@ class WineCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super(WineCreateSerializer, self).validate(attrs=attrs)
         Beverage.validate_region(attrs["region"], attrs["country"], ValidationError)
+        Beverage.validate_product_code(attrs["product_code"], ValidationError)
+        return data
 
     class Meta:
         model = Wine
