@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from products.models import Wine, Country, Region, GrapeVariety
+from products.models import Wine, Country, Region, GrapeVariety, Manufacturer
 
 
 @admin.register(Country)
@@ -10,6 +10,11 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Manufacturer)
+class ManufacturerAdmin(admin.ModelAdmin):
     pass
 
 
