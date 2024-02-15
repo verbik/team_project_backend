@@ -18,7 +18,6 @@ class GrapeVarietySerializer(serializers.ModelSerializer):
         )
 
 
-#  TODO: add nested serializer
 class ManufacturerSerializer(serializers.ModelSerializer):
 
     class Meta:
