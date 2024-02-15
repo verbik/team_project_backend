@@ -2,6 +2,7 @@ import os
 import uuid
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -47,8 +48,8 @@ def create_custom_path(instance, filename):
 class Beverage(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(
-        max_digits=10, decimal_places=2
-    )  # TODO: add constraints
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0.1)]
+    )
     description = models.TextField(null=True, blank=True)
     manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
 
@@ -62,27 +63,36 @@ class Beverage(models.Model):
     )
 
     # Alcohol content of specific beverage
-    alcohol_content = models.FloatField(null=True, blank=True)  # TODO: add constraints
+    alcohol_content = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(99.99)],
+    )
 
     # Volume of the beverage in liters
     volume = models.DecimalField(
-        max_digits=4, decimal_places=2
-    )  # TODO: add constraints
+        max_digits=4,
+        decimal_places=2,
+        validators=[MinValueValidator(0.1), MaxValueValidator(6)],
+    )
     image = models.ImageField(null=True, blank=True, upload_to=create_custom_path)
+
+    @staticmethod
+    def validate_region(region: Region, country: Country, error_to_raise):
+        """Validate if region is from instances country"""
+        if region:
+            if region.country != country:
+                raise error_to_raise(
+                    "Region must be selected from the instance country."
+                )
 
     class Meta:
         abstract = True
 
     def clean(self):
-        # Ensure that content_object is an instance of Beverage or its subclasses
-        if self.region:
-            if self.region.country != self.country:
-                raise ValidationError(
-                    {
-                        "region": "The wine region must be selected from the chosen country."
-                    },
-                    code="invalid_region",
-                )
+        Beverage.validate_region(self.region, self.country, ValidationError)
 
     def save(self, *args, **kwargs):
         self.clean()

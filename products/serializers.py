@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from products.models import Manufacturer, Country, Beverage, Wine, GrapeVariety
 
@@ -82,6 +83,10 @@ class WineSerializer(BeverageSerializer):
 
 class WineCreateSerializer(serializers.ModelSerializer):
     grape_variety = GrapeVarietySerializer(read_only=False, many=True)
+
+    def validate(self, attrs):
+        data = super(WineCreateSerializer, self).validate(attrs=attrs)
+        Beverage.validate_region(attrs["region"], attrs["country"], ValidationError)
 
     class Meta:
         model = Wine
