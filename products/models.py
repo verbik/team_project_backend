@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -29,7 +30,6 @@ class Manufacturer(models.Model):
     info = models.TextField(null=True, blank=True)
     country_of_origin = models.ForeignKey(Country, on_delete=models.CASCADE)
     website = models.URLField()
-    #  TODO: add imagefield
 
     def __str__(self):
         return self.name
@@ -57,7 +57,7 @@ class Beverage(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     region = models.ForeignKey(
         Region, on_delete=models.DO_NOTHING, null=True, blank=True
-    )  # TODO: region can be only from country in wine
+    )
 
     # Alcohol content of specific beverage
     alcohol_content = models.FloatField(null=True, blank=True)  # TODO: add constraints
@@ -70,6 +70,18 @@ class Beverage(models.Model):
 
     class Meta:
         abstract = True
+
+    def clean(self):
+        # Ensure that content_object is an instance of Beverage or its subclasses
+        if self.region.country != self.country:
+            raise ValidationError(
+                {"region": "The wine region must be selected from the chosen country."},
+                code="invalid_region",
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class GrapeVariety(models.Model):
