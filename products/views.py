@@ -37,7 +37,12 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 
 class WineViewSet(viewsets.ModelViewSet):
-    queryset = Wine.objects.all()
+    def get_queryset(self):
+        queryset = Wine.objects.all().select_related("manufacturer")
+
+        if self.action == "retrieve":
+            queryset = queryset.prefetch_related("grape_variety")
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "retrieve":
