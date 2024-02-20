@@ -13,14 +13,10 @@ from products.models import Beverage
 class Order(models.Model):
     """Order model"""
 
-    STATUS_CHOICES = {
-        "P": "pending",
-        "C": "completed",
-    }
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
     is_paid = models.BooleanField(default=False)
 
     @property
@@ -43,7 +39,9 @@ class OrderItem(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)], default=1)
+    quantity = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)], default=1, null=True, blank=True
+    )
 
     def __str__(self):
         return f"{self.quantity} x {self.content_object}"

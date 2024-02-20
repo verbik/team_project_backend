@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MinValueValidator
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from orders.models import OrderItem, Order
 
@@ -41,20 +42,52 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ("id", "user", "is_paid", "total_price", "items")
-        read_only_fields = ("total_price", "user")
+        fields = ("id", "user", "created_at", "is_paid", "total_price", "items")
+        read_only_fields = ("total_price", "user", "is_paid")
+
+    """
+    {
+    "items": 
+       [
+           {
+               "content_type": "wine",
+               "object_id": 1,
+               "quantity": 1
+           }
+       ]
+}
+    """
 
     def create(self, validated_data):
-        with transaction.atomic():
-            items_data = validated_data.pop("items")
-            order = Order.objects.create(**validated_data)
-            for item_data in items_data:
-                OrderItem.objects.create(order=order, **item_data)
+        if (
+            not validated_data["user"].orders
+            or validated_data["user"].orders.filter(is_paid=False).count() == 0
+        ):
+            with transaction.atomic():
+                items_data = validated_data.pop("items")
+                order = Order.objects.create(**validated_data)
 
-            order.total_price = sum(item.item_price for item in order.items.all())
-            order.save()
-            return order
+                for item_data in items_data:
+                    item = OrderItem.objects.create(order=order, **item_data)
+
+                order.is_paid = False
+                order.save()
+                return order
+        else:
+            raise ValidationError("User with unpaid orders can't create new orders!")
 
 
-class OrderListSerializer(OrderSerializer):
+class OrderListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ("id", "created_at", "is_paid", "total_price")
+
+
+class OrderAdminListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ("id", "created_at", "user", "is_paid", "total_price")
+
+
+class OrderDetailSerializer(OrderSerializer):
     items = OrderItemSerializer(many=True, read_only=True)

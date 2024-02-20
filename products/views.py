@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from products.filters import WineFilter
 from products.models import Manufacturer, Country, Wine, GrapeVariety
+from products.permissions import IsAdminOrReadOnly
 from products.serializers import (
     ManufacturerListSerializer,
     ManufacturerDetailSerializer,
@@ -20,16 +21,19 @@ from products.serializers import (
 
 
 class CountryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser,]
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
 
 
 class GrapeVarietyViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser, ]
     queryset = GrapeVariety.objects.all()
     serializer_class = GrapeVarietySerializer
 
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser, ]
     queryset = Manufacturer.objects.all()
 
     def get_serializer_class(self):
@@ -43,6 +47,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 
 class WineViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly, ]
     filterset_class = WineFilter
 
     def get_queryset(self):
