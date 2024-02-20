@@ -21,11 +21,13 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from orders.urls import orders_router
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/products/", include("products.urls", namespace="products")),
     path("user/", include("user.urls", namespace="user")),
-    path("api/orders/", include("orders.urls", namespace="orders")),
+    path("api/", include(orders_router.urls)),
     path("__debug__/", include("debug_toolbar.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

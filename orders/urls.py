@@ -2,9 +2,7 @@ from rest_framework import routers
 
 from orders.views import OrderViewSet
 
-router = routers.DefaultRouter()
-router.register("orders", OrderViewSet, basename="orders")
-
-urlpatterns = router.urls
+orders_router = routers.DefaultRouter()
+orders_router.register("orders", OrderViewSet, basename="orders")
 
 app_name = "orders"
