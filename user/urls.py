@@ -5,10 +5,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from comments.views import CommentViewSet
 from user.views import UserDetailViewSet, RegisterView
 
 router = DefaultRouter()
 router.register("me", UserDetailViewSet, basename="user-detail")
+router.register("my-comments", CommentViewSet, basename="comments")
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register_user"),

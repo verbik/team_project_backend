@@ -3,10 +3,13 @@ import re
 import uuid
 from datetime import datetime
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
+
+from comments.models import Comment
 
 
 class Country(models.Model):
@@ -147,6 +150,7 @@ class Wine(Beverage):
     sugar_content = models.CharField(max_length=20, choices=SUGAR_CONTENT_CHOICES)
     color = models.CharField(max_length=5, choices=COLOR_CHOICES)
     grape_variety = models.ManyToManyField(GrapeVariety, related_name="grape_variety")
+    comments = GenericRelation(Comment, related_query_name="wines")
 
     @property
     def short_description(self):

@@ -12,6 +12,9 @@ from orders.serializers import (
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
+    filterset_fields = [
+        "is_paid",
+    ]
 
     def get_queryset(self):
         queryset = Order.objects.all()

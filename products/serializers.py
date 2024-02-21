@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from comments.serializers import CommentSerializer
 from products.models import Manufacturer, Country, Beverage, Wine, GrapeVariety
 
 
@@ -140,6 +141,11 @@ class WineDetailSerializer(WineSerializer):
     manufacturer = serializers.SlugRelatedField(
         many=False, read_only=True, slug_field="name"
     )
+    comments = CommentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Wine
+        fields = WineSerializer.Meta.fields + ("comments",)
 
 
 class WineListSerializer(serializers.ModelSerializer):

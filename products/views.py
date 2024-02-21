@@ -1,8 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
+from comments.models import Comment
+from comments.serializers import CommentSerializer
 from products.filters import WineFilter
 from products.models import Manufacturer, Country, Wine, GrapeVariety
 from products.permissions import IsAdminOrReadOnly
@@ -21,19 +23,25 @@ from products.serializers import (
 
 
 class CountryViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser,]
+    permission_classes = [
+        IsAdminUser,
+    ]
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
 
 
 class GrapeVarietyViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser, ]
+    permission_classes = [
+        IsAdminUser,
+    ]
     queryset = GrapeVariety.objects.all()
     serializer_class = GrapeVarietySerializer
 
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser, ]
+    permission_classes = [
+        IsAdminUser,
+    ]
     queryset = Manufacturer.objects.all()
 
     def get_serializer_class(self):
@@ -47,7 +55,9 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 
 class WineViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrReadOnly, ]
+    permission_classes = [
+        IsAdminOrReadOnly,
+    ]
     filterset_class = WineFilter
 
     def get_queryset(self):
@@ -70,6 +80,9 @@ class WineViewSet(viewsets.ModelViewSet):
         if self.action == "upload_image":
             return WineImageSerializer
 
+        if self.action == "add_comment":
+            return CommentSerializer
+
         return WineSerializer
 
     @action(
@@ -85,4 +98,26 @@ class WineViewSet(viewsets.ModelViewSet):
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="add-comment",
+        permission_classes=[
+            IsAuthenticated,
+        ],
+    )
+    def add_comment(self, request, pk=None):
+        """Endpoint for posting a comment to specified post"""
+        wine = self.get_object()
+        comment_contents = request.data.get("comment_contents")
+
+        comment = Comment.objects.create(
+            user=request.user,
+            content_object=wine,
+            comment_contents=comment_contents,
+        )
+
+        serializer = CommentSerializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)
